@@ -1,0 +1,11 @@
+{
+  "domain": "smart_home",
+  "name": "casaIT SmartHome",
+  "documentation": "https://github.com/yourusername/smart_home",
+  "dependencies": [],
+  "codeowners": ["@Gurkengewuerz"],
+  "requirements": ["websocket-client>=1.8.0"],
+  "config_flow": true,
+  "iot_class": "local_push",
+  "version": "1.0.0"
+}
