@@ -1,0 +1,19 @@
+# Service definitions for the smart_home integration
+set_animation_speed:
+    name: Set animation speed
+    description: Set the animation speed for an RGB light.
+    target:
+        entity:
+            domain: light
+            supported_features:
+                - light.LightEntityFeature.EFFECT
+    fields:
+        speed:
+            name: Speed
+            description: The animation speed (0-255)
+            required: true
+            selector:
+                number:
+                    min: 0
+                    max: 255
+                    mode: slider

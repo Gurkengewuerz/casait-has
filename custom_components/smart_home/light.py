@@ -135,6 +135,19 @@ class SmartHomeLight(SmartHomeEntity, LightEntity):
         _LOGGER.debug("Unknown animation mode: %s", animation)
         return None
 
+    async def set_animation_speed(self, speed: int) -> None:
+        """Set the animation speed."""
+        data = {
+            "animation_speed": speed
+        }
+        _LOGGER.debug("Setting animation speed to %s", speed)
+        async with aiohttp.ClientSession() as session:
+            url = f"{self.coordinator.api_url}/api/devices/{self._device_id}/state"
+            async with session.put(url, json=data) as response:
+                if response.status != 200:
+                    _LOGGER.error("Failed to update LED configuration: %s", response.status)
+                    return
+
     async def async_turn_on(self, **kwargs: Any) -> None:
         """Turn the light on."""
         data = {
