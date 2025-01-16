@@ -77,7 +77,6 @@ class SmartHomeLightSensor(SmartHomeEntity, SensorEntity):
     @property
     def native_value(self) -> float | None:
         """Return the sensor value."""
-        _LOGGER.debug(f"Light sensor value: {self.device_state}")
         return self.device_state.get("value")
 
 class SmartHomeGenericSensor(SmartHomeEntity, SensorEntity):

@@ -5,6 +5,7 @@ import logging
 
 from homeassistant.core import callback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
+from homeassistant.helpers.device_registry import CONNECTION_NETWORK_MAC, DeviceInfo
 
 from .const import DOMAIN
 from .coordinator import SmartHomeDataUpdateCoordinator
@@ -16,6 +17,9 @@ _LOGGER = logging.getLogger(__name__)
 class SmartHomeEntity(CoordinatorEntity):
     """Base class for Smart Home entities."""
 
+    _attr_has_entity_name = True
+    _attr_name = None
+
     def __init__(
         self,
         coordinator: SmartHomeDataUpdateCoordinator,
@@ -24,13 +28,7 @@ class SmartHomeEntity(CoordinatorEntity):
         """Initialize the entity."""
         super().__init__(coordinator)
         self._device_id = device_id
-        self._attr_device_info = {
-            "identifiers": {(DOMAIN, device_id)},
-            "name": self.device_data["name"],
-            "manufacturer": "casaIT",
-            "model": self.device_data["device_type"],
-            "via_device": (DOMAIN, coordinator.entry_id),
-        }
+        _LOGGER.debug("Initialized entity %s", self.device_data["name"])
 
     @property
     def device_data(self) -> dict:
@@ -47,17 +45,23 @@ class SmartHomeEntity(CoordinatorEntity):
         """Return if entity is available."""
         return self.coordinator.last_update_success and self._device_id in self.coordinator._devices
 
-    @property
-    def name(self):
-        """Name of the sensor"""
-        return self.device_data["name"]
-
-    @property
-    def unique_id(self):
-        """ID of the sensor"""
-        return f'casait_{self.device_data["id"]}_{self.device_data["uuid"]}'
-
     @callback
     def _handle_coordinator_update(self) -> None:
         """Handle updated data from the coordinator."""
         self.async_write_ha_state()
+
+    @property
+    def unique_id(self) -> str:
+        """Return a unique ID to use for this entity."""
+        return self.device_data["uuid"]
+
+    @property
+    def device_info(self) -> DeviceInfo:
+        """Return device information about this WLED device."""
+        return DeviceInfo(
+            identifiers={(DOMAIN, self.unique_id)},
+            name=self.device_data["name"],
+            manufacturer="casaIT",
+            model=self.device_data["device_type"].replace("_", " ").title(),
+            via_device=(DOMAIN, self.coordinator.entry_id),
+        )

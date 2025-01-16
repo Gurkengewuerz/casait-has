@@ -4,8 +4,6 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-import voluptuous as vol
-
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform, CONF_HOST, CONF_PORT, CONF_NAME
 from homeassistant.core import HomeAssistant, callback
@@ -16,7 +14,6 @@ from .const import (
     DATA_COORDINATOR,
     DATA_CONFIG,
     DEFAULT_PORT,
-    DEVICE_TYPE_MAPPING,
 )
 from .coordinator import SmartHomeDataUpdateCoordinator
 
@@ -24,6 +21,7 @@ _LOGGER = logging.getLogger(__name__)
 
 PLATFORMS: list[Platform] = [
     Platform.SWITCH,
+    Platform.LIGHT,
     Platform.BUTTON,
     Platform.COVER,
     Platform.SENSOR,

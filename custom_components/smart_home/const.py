@@ -14,12 +14,3 @@ STEP_USER: Final = "user"
 
 DATA_COORDINATOR: Final = "coordinator"
 DATA_CONFIG: Final = "config"
-
-# Device type mapping
-DEVICE_TYPE_MAPPING = {
-    "switch": "switch",
-    "pushbutton": "button",
-    "blind": "cover",
-    "sensor": "sensor",
-    "binary_sensor": "binary_sensor"
-}
