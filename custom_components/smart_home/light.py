@@ -168,10 +168,12 @@ class SmartHomeLight(SmartHomeEntity, LightEntity):
         if ATTR_EFFECT in kwargs:
             # Convert HA effect name back to API animation mode
             effect_name = kwargs[ATTR_EFFECT]
-            if effect_name in self._effect_map:
-                data["animation"] = self._effect_map[effect_name]
+            effect_key = list(self._effect_map.keys())[list(self._effect_map.values()).index(effect_name)]
+            if effect_key is not None:
+                # get effect key from value
+                data["animation"] = effect_key
             else:
-                _LOGGER.warning("Unknown effect name: %s. Valid effects are: %s", effect_name, list(self._effect_map.keys()))
+                _LOGGER.warning("Unknown effect name: %s (%s). Valid effects are: %s", effect_name, effect_key, list(self._effect_map.keys()))
 
         _LOGGER.debug("Sending data to API: %s", data)
         async with aiohttp.ClientSession() as session:
