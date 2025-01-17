@@ -17,3 +17,43 @@ set_animation_speed:
                     min: 0
                     max: 255
                     mode: slider
+
+set_colors:
+    name: Set colors
+    description: Set up to 5 colors for an RGB light.
+    target:
+        entity:
+            domain: light
+            supported_features:
+                - light.LightEntityFeature.EFFECT
+    fields:
+        color1:
+            name: Color 1
+            description: First color in RGB format [r, g, b]
+            required: true
+            selector:
+                color_rgb:
+        color2:
+            name: Color 2
+            description: Second color in RGB format [r, g, b]
+            required: false
+            selector:
+                color_rgb:
+        color3:
+            name: Color 3
+            description: Third color in RGB format [r, g, b]
+            required: false
+            selector:
+                color_rgb:
+        color4:
+            name: Color 4
+            description: Fourth color in RGB format [r, g, b]
+            required: false
+            selector:
+                color_rgb:
+        color5:
+            name: Color 5
+            description: Fifth color in RGB format [r, g, b]
+            required: false
+            selector:
+                color_rgb:

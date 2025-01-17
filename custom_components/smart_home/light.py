@@ -165,6 +165,17 @@ class SmartHomeLight(SmartHomeEntity, LightEntity):
             # Always maintain 5 colors array, set first color and pad with black
             data["colors"] = [color_hex] + ['000000'] * 4
 
+        # Handle multiple color update from set_colors service
+        elif "colors" in kwargs:
+            colors = ['000000'] * 5  # Default to all black
+            # Update each color at its specified index
+            for color_data in kwargs["colors"]:
+                r, g, b = color_data["rgb_color"]
+                color_hex = f"{r:02x}{g:02x}{b:02x}"
+                colors[color_data["colors_index"]] = color_hex
+
+            data["colors"] = colors
+
         if ATTR_EFFECT in kwargs:
             # Convert HA effect name back to API animation mode
             effect_name = kwargs[ATTR_EFFECT]
