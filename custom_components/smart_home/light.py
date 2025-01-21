@@ -56,6 +56,8 @@ async def async_setup_entry(
         for device_id, device in coordinator._devices.items():
             if device["device_type"] == "rgb_led":
                 entities.append(SmartHomeLight(coordinator, device_id, effect_map))
+            elif device["device_type"] == "dimmer":
+                entities.append(SmartHomeDimmerLight(coordinator, device_id))
 
         async_add_entities(entities)
     except HomeAssistantError as e:
@@ -184,7 +186,8 @@ class SmartHomeLight(SmartHomeEntity, LightEntity):
                 # get effect key from value
                 data["animation"] = effect_key
             else:
-                _LOGGER.warning("Unknown effect name: %s (%s). Valid effects are: %s", effect_name, effect_key, list(self._effect_map.keys()))
+                _LOGGER.warning("Unknown effect name: %s (%s). Valid effects are: %s", effect_name, effect_key,
+                                list(self._effect_map.keys()))
 
         _LOGGER.debug("Sending data to API: %s", data)
         async with aiohttp.ClientSession() as session:
@@ -198,5 +201,66 @@ class SmartHomeLight(SmartHomeEntity, LightEntity):
         async with aiohttp.ClientSession() as session:
             url = f"{self.coordinator.api_url}/api/devices/{self._device_id}/state"
             async with session.put(url, json={"state": False}) as response:
+                if response.status != 200:
+                    _LOGGER.error("Failed to turn off light: %s", response.status)
+
+
+class SmartHomeDimmerLight(SmartHomeEntity, LightEntity):
+    """Representation of a Smart Home dimmer light."""
+
+    def __init__(
+        self,
+        coordinator: SmartHomeDataUpdateCoordinator,
+        device_id: str,
+    ) -> None:
+        """Initialize the light."""
+        super().__init__(coordinator, device_id)
+
+        # Set color modes
+        self._attr_supported_color_modes = {ColorMode.BRIGHTNESS}
+        self._attr_color_mode = ColorMode.BRIGHTNESS
+
+    @property
+    def is_on(self) -> bool | None:
+        """Return if the light is on."""
+        if not self.device_state:
+            return None
+
+        if "value" in self.device_state:
+            return self.device_state["value"] > 0
+
+        return False
+
+    @property
+    def brightness(self) -> int | None:
+        """Return the brightness of the light."""
+        if not self.device_state or "value" not in self.device_state:
+            return None
+
+        # Convert 0-100 to 0-255 range
+        return int(self.device_state["value"] * 255 / 100)
+
+    async def async_turn_on(self, **kwargs: Any) -> None:
+        """Turn on the light."""
+        data = {}
+
+        if ATTR_BRIGHTNESS in kwargs:
+            # Convert brightness to percentage
+            brightness = kwargs[ATTR_BRIGHTNESS]
+            data["value"] = round((brightness * 100) / 255)
+        else:
+            data["value"] = 100
+
+        async with aiohttp.ClientSession() as session:
+            url = f"{self.coordinator.api_url}/api/devices/{self._device_id}/state"
+            async with session.put(url, json=data) as response:
+                if response.status != 200:
+                    _LOGGER.error("Failed to turn on light: %s", response.status)
+
+    async def async_turn_off(self, **kwargs: Any) -> None:
+        """Turn off the light."""
+        async with aiohttp.ClientSession() as session:
+            url = f"{self.coordinator.api_url}/api/devices/{self._device_id}/state"
+            async with session.put(url, json={"value": 0}) as response:
                 if response.status != 200:
                     _LOGGER.error("Failed to turn off light: %s", response.status)
